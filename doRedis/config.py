@@ -10,3 +10,4 @@ redis_config = {
     "http_data_name": "http_data",
     "http_result_name" : "http_result"
 }
+
