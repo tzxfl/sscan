@@ -6,7 +6,7 @@
 
 sqli_config = {
     "delay": 0,
-    "sleep_time": 3,
+    "sleep_time": 5,
 
     "payload": {
         "'xor(sleep(%d))or'",

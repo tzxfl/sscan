@@ -18,6 +18,10 @@ from cStringIO import StringIO
 from subprocess import Popen, PIPE
 from HTMLParser import HTMLParser
 
+import redis
+from doRedis.config import redis_config
+from doRedis.connectRedis import connectRedis
+
 
 def with_color(c, s):
     return "\x1b[%dm%s\x1b[0m" % (c, s)
@@ -203,6 +207,14 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         with self.lock:
             self.save_handler(req, req_body, res, res_body_plain)
 
+        # save redis here
+        method = req.command.lower()
+        url = req.path
+        headers = req.headers.dict
+        body = req_body
+
+        self.save_redis(method, url, headers, body)
+
     def relay_streaming(self, res):
         self.wfile.write("%s %d %s\r\n" % (self.protocol_version, res.status, res.reason))
         for line in res.headers.headers:
@@ -369,6 +381,15 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def save_handler(self, req, req_body, res, res_body):
         self.print_info(req, req_body, res, res_body)
 
+    def save_redis(self, method, url, headers, body):
+        r = redis.Redis(connection_pool=pool)
+
+        json_result = {"method": method, "url": url, "headers": headers, "body": body}
+        string_result = json.dumps(json_result)
+        list_name = redis_config["http_data_name"]
+
+        r.lpush(list_name, string_result)
+
 
 def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
     if sys.argv[1:]:
@@ -386,4 +407,7 @@ def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, prot
 
 
 if __name__ == '__main__':
+
+    # 连接redis
+    pool = connectRedis()
     test()

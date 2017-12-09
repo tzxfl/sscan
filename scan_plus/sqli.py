@@ -145,10 +145,11 @@ if __name__ == "__main__":
     method = "post"
     url = "http://www.th1s.cn/test/sqli/1.php"
     header = {}
-    param = {"aaa": 1}
-    data = {"id": "2"}
+    param = {"aaa": 1, "bbb": 3}
+    data = {"id": "2", "aa": 4}
 
     test = SqliScanner(method, url, header, param, data)
     test.doWork()
 
     # result in scan_result
+    print test.scan_result
