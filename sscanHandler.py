@@ -70,8 +70,16 @@ if __name__ == "__main__":
     else:
         threadNum = 5
 
-    threading.Thread(target=listenRedis, args=(r, queue, listName)).start()
+    t1 = threading.Thread(target=listenRedis, args=(r, queue, listName))
+    t1.setDaemon(True)
+    t1.start()
 
     for i in range(threadNum):
-        threading.Thread(target=scan, args=(r, queue, scanModule)).start()
+        t2 = threading.Thread(target=scan, args=(r, queue, scanModule))
+        t2.setDaemon(True)
+        t2.start()
+
+    # 使用while True来实现join，实现ctrl+c退出进程
+    while True:
+        pass
 
