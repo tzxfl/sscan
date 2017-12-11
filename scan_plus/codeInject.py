@@ -42,7 +42,7 @@ class CodeInjectScanner(Scanner):
                 flag = self.doCurl(scan_param, self.data, self.header)
                 if flag:
                     # 检测是否误报
-                    if self.doCurl(self.param, self.data, self.header):
+                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(scan_param, self.data, self.header):
                         logging.warning("False positives in %s" % self.url)
                     else:
                         logging.info('code inject in %s : %s' % (self.url, scan_param))
@@ -53,7 +53,7 @@ class CodeInjectScanner(Scanner):
                 flag = self.doCurl(self.param, scan_param, self.header)
                 if flag:
                     # 检测是否误报
-                    if self.doCurl(self.param, self.data, self.header):
+                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(self.param, scan_param, self.header):
                         logging.warning("False positives in %s" % self.url)
                     else:
                         logging.info('code inject in %s : %s' % (self.url, scan_param))
