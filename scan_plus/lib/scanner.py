@@ -6,6 +6,7 @@ import Queue
 import logging
 import threading
 import requests
+import random
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
@@ -35,7 +36,7 @@ class Scanner:
         # delay     int     请求delay
         # sleep_time int    延时时长
         self.delay = 0
-        self.sleep_time = 0
+        self.sleep_time = 5
 
         # payload   dict    注入payload
         self.payload = {}
@@ -47,6 +48,11 @@ class Scanner:
         self.scan_result["ret"] = 0
         self.scan_result["param"] = []
 
+    # 生成payload
+    # 默认返回self.payload
+    def genPayload(self):
+        return self.payload
+
     # 给所有的参数加上 payload
     # return type is dict
     def addPayload(self, param={}, data={}, header={}, cookie={}):
@@ -55,10 +61,7 @@ class Scanner:
         final_cookie = {}
         final_header = {}
 
-        payload = []
-        for p in self.payload:
-            p = p % self.sleep_time
-            payload.append(p)
+        payload = self.genPayload()
 
         if param:
             for k, v in param.iteritems():
@@ -114,22 +117,24 @@ class Scanner:
         pqueue = Queue.Queue()
         dqueue = Queue.Queue()
 
-        if self.param:
+        if param:
             for key, values in param.iteritems():
                 for value in values:
-                    scan_param = {}
+                    scan_param = self.param.copy()
                     scan_param[key] = value
                     pqueue.put(scan_param)
-        if self.data:
+        if data:
             for key, values in data.iteritems():
                 for value in values:
-                    scan_param = {}
+                    scan_param = self.data.copy()
                     scan_param[key] = value
                     dqueue.put(scan_param)
 
         for i in range(self.thread_num):
-            t1 = threading.Thread(target=self.doScan, args=(pqueue,)).start()
-            t2 = threading.Thread(target=self.doScan, args=(dqueue,)).start()
+            if pqueue:
+                threading.Thread(target=self.doScan, args=(pqueue,)).start()
+            if dqueue:
+                threading.Thread(target=self.doScan, args=(dqueue,)).start()
 
         pqueue.join()
         dqueue.join()

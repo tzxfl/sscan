@@ -9,7 +9,7 @@ import Queue
 import json
 import urlparse
 import urllib
-from scan_plus.sqli import SqliScanner
+from scan_plus.sqli import *
 import threading
 
 def solveUrlParam(rowJson):
@@ -54,8 +54,8 @@ def scan(r, queue, scanModule):
                 row['payload'] = scanner.scan_result['param']
                 resultJson = json.dumps(row)
                 r.rpush(redis_config['http_result_name'], resultJson)
-            print 'done'
-        time.sleep(0.1)
+            #print 'done'
+        #time.sleep(0.1)
 
 if __name__ == "__main__":
     pool = connectRedis()

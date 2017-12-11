@@ -1,32 +1,20 @@
 # coding=utf-8
-# code&command inject scanner
+# code inject scanner
 # by Th1s
 
-import logging
-
+from lib.scanner import *
 from lib.config import code_inject_config
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
 
-# sql 注入检测模块
-# 利用延时盲注
-class CodeInjectScanner:
+# code inject 检测模块
+# 利用延时
+class CodeInjectScanner(Scanner):
 
     def __init__(self, *args, **kwargs):
 
-        # method  string  http方法
-        # url     string  请求rul
-        # header  dict    http头部
-        # param   dict    get参数
-        # data    dict    post参数
-
-        method, url, header, param, data = args
-        self.url = url
-        self.method = method
-        self.header = header
-        self.param = param
-        self.data = data
+        Scanner.__init__(self, *args, **kwargs)
 
         # delay     int     请求delay
         # sleep_time int     延时时长
@@ -36,34 +24,53 @@ class CodeInjectScanner:
         # payload   dict    注入payload
         self.payload = code_inject_config['payload']
 
-        self.scan_result = {}
-        self.scan_result["ret"] = 0
-        self.scan_result["param"] = []
+    # override
+    def genPayload(self):
+        payload = []
+        for p in self.payload:
+            p = p % self.sleep_time
+            payload.append(p)
+        return payload
 
-        # 给参数加上payload
-        # final_params = {'id': ['1 xor(sleep(3))']}
-        def addPayload(self, param={}, data={}):
+    # override
+    def doScan(self, q):
+        while not q.empty():
+            scan_param = q.get()
 
-            final_params = {}
-            final_data = {}
+            # do scan here
+            if scan_param.keys() == self.param.keys():
+                flag = self.doCurl(scan_param, self.data, self.header)
+                if flag:
+                    # 检测是否误报
+                    if self.doCurl(self.param, self.data, self.header):
+                        logging.warning("False positives in %s" % self.url)
+                    else:
+                        logging.info('code inject in %s : %s' % (self.url, scan_param))
+                        self.scan_result["param"].append(scan_param)
+                        self.scan_result["ret"] = 1
 
-            payload = []
-            for p in self.payload:
-                p = p % self.sleep_time
-                payload.append(p)
+            else:
+                flag = self.doCurl(self.param, scan_param, self.header)
+                if flag:
+                    # 检测是否误报
+                    if self.doCurl(self.param, self.data, self.header):
+                        logging.warning("False positives in %s" % self.url)
+                    else:
+                        logging.info('code inject in %s : %s' % (self.url, scan_param))
+                        self.scan_result["param"].append(scan_param)
+                        self.scan_result["ret"] = 1
+            q.task_done()
 
-            if param:
-                for k, v in param.iteritems():
-                    final_params[k] = []
-                    for p in payload:
-                        v1 = str(v) + p
-                        final_params[k].append(v1)
+if __name__ == "__main__":
+    method = "post"
+    url = "http://www.th1s.cn/test/sqli/code.php"
+    header = {}
+    param = {"id": 1, "bbb": 3}
+    data = {}
+    #data = {"b": "2", "aa": 4}
 
-            if data:
-                for k, v in data.iteritems():
-                    final_data[k] = []
-                    for p in payload:
-                        v1 = str(v) + p
-                        final_data[k].append(v1)
+    test = CodeInjectScanner(method, url, header, param, data)
+    test.doWork()
 
-            return final_params, final_data
+    # result in scan_result
+    print test.scan_result

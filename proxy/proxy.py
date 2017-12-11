@@ -19,8 +19,8 @@ from subprocess import Popen, PIPE
 from HTMLParser import HTMLParser
 
 import redis
-from doRedis.config import redis_config
-from doRedis.connectRedis import connectRedis
+from sscan.doRedis.config import redis_config
+from sscan.doRedis.connectRedis import connectRedis
 
 
 def with_color(c, s):
