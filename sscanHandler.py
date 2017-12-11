@@ -12,6 +12,7 @@ import urllib
 from scan_plus.sqli import *
 import threading
 
+
 def solveUrlParam(rowJson):
     res = {}
     res['url'] = rowJson['url']
@@ -25,7 +26,8 @@ def solveUrlParam(rowJson):
 
     if res['method'].lower() == 'post':
         #目前处理a=1&b=2形式，后续添加更多形式
-        res['data'] = dict([(k,v[0]) for k,v in urlparse.parse_qs(rowJson['body'].encode("UTF-8")).items()])
+        if rowJson['body']:
+            res['data'] = dict([(k,v[0]) for k,v in urlparse.parse_qs(rowJson['body'].encode("UTF-8")).items()])
     return res
 
 def listenRedis(r, queue, listName):
@@ -79,6 +81,7 @@ if __name__ == "__main__":
         t2.setDaemon(True)
         t2.start()
 
+    print "Handler start..."
     # 使用while True来实现join，实现ctrl+c退出进程
     while True:
         pass

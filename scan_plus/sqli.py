@@ -41,10 +41,10 @@ class SqliScanner(Scanner):
                 flag = self.doCurl(scan_param, self.data, self.header)
                 if flag:
                     # 检测是否误报
-                    if self.doCurl(self.param, self.data, self.header):
+                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(scan_param, self.data, self.header):
                         logging.warning("False positives in %s" % self.url)
                     else:
-                        logging.info('sqli in %s : %s' % (self.url, scan_param))
+                        logging.info('sqli in %s, method : "%s", payload : %s' % (self.url, self.method, scan_param))
                         self.scan_result["param"].append(scan_param)
                         self.scan_result["ret"] = 1
 
@@ -52,17 +52,17 @@ class SqliScanner(Scanner):
                 flag = self.doCurl(self.param, scan_param, self.header)
                 if flag:
                     # 检测是否误报
-                    if self.doCurl(self.param, self.data):
+                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(self.param, scan_param, self.header):
                         logging.warning("False positives in %s" % self.url)
                     else:
-                        logging.info('sqli in %s : %s' % (self.url, scan_param))
+                        logging.info('sqli in %s, method : "%s", payload : %s' % (self.url, self.method, scan_param))
                         self.scan_result["param"].append(scan_param)
                         self.scan_result["ret"] = 1
             q.task_done()
 
 if __name__ == "__main__":
     method = "post"
-    url = "http://www.th1s.cn/test/sqli/sqli.php"
+    url = "http://www.th1s.cn/test/sqli/1.php"
     header = {}
     param = {"aaa": 1, "bbb": 3}
     data = {"id": "2", "aa": 4}

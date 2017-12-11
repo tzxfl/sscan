@@ -32,7 +32,7 @@ class CommandInjectScanner(Scanner):
 
             # do scan here
             if scan_param.keys() == self.param.keys():
-                random_key = str(random.random())
+                random_key = ''.join(str(random.random()).split('.'))
                 string_scan_param = json.dumps(scan_param) % (random_key, self.ceye_host)
                 scan_param = eval(string_scan_param)
                 flag = self.doCurl(scan_param, self.data, self.header)
@@ -47,7 +47,7 @@ class CommandInjectScanner(Scanner):
                     self.scan_result["ret"] = 1
 
             else:
-                random_key = str(random.random())
+                random_key = ''.join(str(random.random()).split('.'))
                 string_scan_param = json.dumps(scan_param) % (random_key, self.ceye_host)
                 scan_param = eval(string_scan_param)
                 flag = self.doCurl(self.param, scan_param, self.header)
