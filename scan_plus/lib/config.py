@@ -2,7 +2,7 @@
 # config file
 # dict 格式存储
 
-# sqli_config
+# sqli config
 
 sqli_config = {
     "delay": 0,
@@ -13,5 +13,18 @@ sqli_config = {
         "\"xor(sleep(%d))or\"",
         "1 xor(sleep(%d))or'",
         ",sleep(%d)",
+    }
+}
+
+# code&command inject config
+
+code_inject_config = {
+    "delay": 0,
+    "sleep_time": 5,
+
+    "payload": {
+        "${sleep %d}",
+        "'.(sleep(%d).",
+        "\".(sleep(%d)).\"",
     }
 }
