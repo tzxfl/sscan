@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import redis
+from scan_plus.sqli import *
+from proxy.proxy import *
 from doRedis.config import redis_config
 from doRedis.connectRedis import connectRedis
+
+import redis
 import sys
 import time
 import Queue
 import json
 import urlparse
-import urllib
-from scan_plus.sqli import *
 import threading
+from multiprocessing import Process
 
 
 def solveUrlParam(rowJson):
@@ -30,9 +32,9 @@ def solveUrlParam(rowJson):
             res['data'] = dict([(k,v[0]) for k,v in urlparse.parse_qs(rowJson['body'].encode("UTF-8")).items()])
     return res
 
+
 def listenRedis(r, queue, listName):
     #连接redis
-
 
     while 1:
         if r.llen(listName) > 0:
@@ -43,6 +45,7 @@ def listenRedis(r, queue, listName):
             queue.put(saveJson)
         else:
             time.sleep(1)
+
 
 def scan(r, queue, scanModule):
     while 1:
@@ -59,10 +62,11 @@ def scan(r, queue, scanModule):
             #print 'done'
         #time.sleep(0.1)
 
-if __name__ == "__main__":
+
+def scanWork():
     pool = connectRedis()
     r = redis.Redis(connection_pool=pool)
-    #定义参数
+    # 定义参数
     listName = redis_config['http_data_name']
     queue = Queue.Queue()
     scanModule = ['sqli']
@@ -81,8 +85,16 @@ if __name__ == "__main__":
         t2.setDaemon(True)
         t2.start()
 
-    print "Handler start..."
+    print "sscanHandler start..."
     # 使用while True来实现join，实现ctrl+c退出进程
     while True:
         pass
+
+if __name__ == "__main__":
+
+    # 同时启动proxy 和 scan
+    p1 = Process(target=proxyStart)
+    p1.start()
+    p2 = Process(target=scanWork)
+    p2.start()
 

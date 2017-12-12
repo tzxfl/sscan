@@ -173,7 +173,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 setattr(res, 'headers', self.filter_headers(res.headers))
                 self.relay_streaming(res)
                 with self.lock:
-                    self.save_handler(req, req_body, res, '')
+                    # self.save_handler(req, req_body, res, '')
+                    pass
                 return
 
             res_body = res.read()
@@ -205,7 +206,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         self.wfile.flush()
 
         with self.lock:
-            self.save_handler(req, req_body, res, res_body_plain)
+            # 不显示抓到的包
+            # self.save_handler(req, req_body, res, res_body_plain)
+            pass
 
         # save redis here
         method = req.command.lower()
@@ -382,6 +385,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         self.print_info(req, req_body, res, res_body)
 
     def save_redis(self, method, url, headers, body):
+        pool = connectRedis()
         r = redis.Redis(connection_pool=pool)
 
         json_result = {"method": method, "url": url, "headers": headers, "body": body}
@@ -391,7 +395,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         r.lpush(list_name, string_result)
 
 
-def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
+def proxyStart(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
     if sys.argv[1:]:
         port = int(sys.argv[1])
     else:
@@ -408,6 +412,4 @@ def test(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, prot
 
 if __name__ == '__main__':
 
-    # 连接redis
-    pool = connectRedis()
-    test()
+    proxyStart()
