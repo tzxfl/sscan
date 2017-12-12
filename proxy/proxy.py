@@ -12,6 +12,7 @@ import zlib
 import time
 import json
 import re
+import chardet
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from SocketServer import ThreadingMixIn
 from cStringIO import StringIO
@@ -51,7 +52,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     cacert = join_with_script_dir('ca.crt')
     certkey = join_with_script_dir('cert.key')
     certdir = join_with_script_dir('certs/')
-    timeout = 5
+    timeout = 10
     lock = threading.Lock()
 
     def __init__(self, *args, **kwargs):
@@ -387,7 +388,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def save_redis(self, method, url, headers, body):
         pool = connectRedis()
         r = redis.Redis(connection_pool=pool)
-
+        if body:
+            char = chardet.detect(body)["encoding"]
+            if char:
+                body = body.decode(char).encode("utf-8")
         json_result = {"method": method, "url": url, "headers": headers, "body": body}
         string_result = json.dumps(json_result)
         list_name = redis_config["http_data_name"]

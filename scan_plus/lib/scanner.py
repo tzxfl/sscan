@@ -98,16 +98,16 @@ class Scanner:
         if self.method.lower() == "get":
             try:
                 r = requests.get(self.url, params=param, headers=header, cookies=cookie, timeout=self.sleep_time)
-                return False
-            except Exception as e:
                 return True
+            except Exception as e:
+                return False
 
         elif self.method.lower() == "post":
             try:
                 r = requests.post(self.url, params=param, data=data, headers=header, cookies=cookie, timeout=self.sleep_time)
-                return False
-            except Exception as e:
                 return True
+            except Exception as e:
+                return False
 
     # 多线程调用doScan
     # 默认只检测 get和post参数
@@ -132,16 +132,18 @@ class Scanner:
 
         for i in range(self.thread_num):
             if pqueue:
-                threading.Thread(target=self.doScan, args=(pqueue,)).start()
+                param_position = "get"
+                threading.Thread(target=self.doScan, args=(pqueue, param_position)).start()
             if dqueue:
-                threading.Thread(target=self.doScan, args=(dqueue,)).start()
+                param_position = "post"
+                threading.Thread(target=self.doScan, args=(dqueue, param_position)).start()
 
         pqueue.join()
         dqueue.join()
 
     # 具体的检测逻辑
     # q 的类型为队列
-    def doScan(self, q):
+    def doScan(self, q, param_position):
         pass
 
 if __name__ == "__main__":
