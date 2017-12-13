@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from scan_plus.sqli import *
-from proxy.proxy import *
-from doRedis.config import redis_config
-from doRedis.connectRedis import connectRedis
-
-import redis
-import sys
-import time
-import Queue
-import json
-import urlparse
-import threading
 from multiprocessing import Process
 
+from web.web.doRedis.connectRedis import connectRedis
+
+from proxy.proxy import *
+from scan_plus.sqli import *
+from web.web.doRedis.config import redis_config
+
+pool = connectRedis()
 
 def solveUrlParam(rowJson):
     res = {}
@@ -64,7 +59,6 @@ def scan(r, queue, scanModule):
 
 
 def scanWork():
-    pool = connectRedis()
     r = redis.Redis(connection_pool=pool)
     # 定义参数
     listName = redis_config['http_data_name']

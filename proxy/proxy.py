@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
-import sys
+import gzip
+import httplib
+import json
 import os
+import re
+import select
 import socket
 import ssl
-import select
-import httplib
-import urlparse
+import sys
 import threading
-import gzip
-import zlib
 import time
-import json
-import re
-import chardet
+import urlparse
+import zlib
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
+from HTMLParser import HTMLParser
 from SocketServer import ThreadingMixIn
 from cStringIO import StringIO
 from subprocess import Popen, PIPE
-from HTMLParser import HTMLParser
 
+import chardet
 import redis
-from doRedis.config import redis_config
-from doRedis.connectRedis import connectRedis
+from web.web.doRedis.connectRedis import connectRedis
+
+from web.web.doRedis.config import redis_config
 
 
 def with_color(c, s):
@@ -386,7 +387,6 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         self.print_info(req, req_body, res, res_body)
 
     def save_redis(self, method, url, headers, body):
-        pool = connectRedis()
         r = redis.Redis(connection_pool=pool)
         if body:
             char = chardet.detect(body)["encoding"]
@@ -413,7 +413,7 @@ def proxyStart(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer
     print "Serving HTTP Proxy on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()
 
+pool = connectRedis()
 
 if __name__ == '__main__':
-
     proxyStart()
