@@ -17,11 +17,9 @@ from HTMLParser import HTMLParser
 from SocketServer import ThreadingMixIn
 from cStringIO import StringIO
 from subprocess import Popen, PIPE
-
 import chardet
-import redis
-from web.web.doRedis.connectRedis import connectRedis
 
+from web.web.doRedis.connectRedis import *
 from web.web.doRedis.config import redis_config
 
 
@@ -412,8 +410,6 @@ def proxyStart(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer
     sa = httpd.socket.getsockname()
     print "Serving HTTP Proxy on", sa[0], "port", sa[1], "..."
     httpd.serve_forever()
-
-pool = connectRedis()
 
 if __name__ == '__main__':
     proxyStart()

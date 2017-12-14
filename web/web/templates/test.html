@@ -1,0 +1,55 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+	
+	<head>
+		<title>sscan result</title>
+
+		<link rel="stylesheet" href="{% static "bootstrap.css" %}">
+		<link rel="stylesheet" href="{% static "bootstrap-table.css" %}">
+
+		<script src="{% static "jquery-3.2.1.min.js" %}"></script>
+		<script src="{% static "bootstrap-table.js" %}"></script>
+		<style> 
+ 			table {word-break: break-all}  
+		</style>
+	</head>
+	<body>
+
+
+        <div>
+            <table data-toggle="table" data-pagination="true">
+
+                <thead>
+                    <th data-field="method">method</th>
+                    <th data-field="url">url</th>
+                    <th data-field="payload">payload</th>
+                    <th data-field="name">name</th>
+                </thead>
+                <tbody id="result_table">
+                    <script>
+                        $.getJSON("http://localhost:8000/getresult",function(json){
+                            var num = json.result_num;
+                            var result = json.result_list;
+
+                            for(var i=0;i<num;i++){
+                                var html="<tr>" +
+                                        "<td>" + result[i].method + "</td>" +
+                                        "<td>" + result[i].url + "</td>" +
+                                        "<td>";
+                                $.each(result[i].payload, function(k, v){html += JSON.stringify(v);})
+                                html += "</td>" +
+                                        "<td>" + "sqli" + "</td>" +
+                                        "</tr>";
+                                $("#result_table").append(html);
+
+                            }
+                            //console.log(result[0].payload);
+
+                        });
+                    </script>
+
+                </tbody>
+            </table>
+        </div>
+	</body>
+</html>

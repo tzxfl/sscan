@@ -2,13 +2,10 @@
 
 from multiprocessing import Process
 
-from web.web.doRedis.connectRedis import connectRedis
-
 from proxy.proxy import *
 from scan_plus.sqli import *
-from web.web.doRedis.config import redis_config
+from web.web.doRedis.connectRedis import *
 
-pool = connectRedis()
 
 def solveUrlParam(rowJson):
     res = {}
