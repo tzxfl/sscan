@@ -1,55 +1,40 @@
-{% load staticfiles %}
 <!DOCTYPE html>
 	
 	<head>
 		<title>sscan result</title>
 
-		<link rel="stylesheet" href="{% static "bootstrap.css" %}">
-		<link rel="stylesheet" href="{% static "bootstrap-table.css" %}">
+        <link rel="stylesheet" href="/static/bootstrap.css">
+		<link rel="stylesheet" href="/static/bootstrap-table.css">
 
-		<script src="{% static "jquery-3.2.1.min.js" %}"></script>
-		<script src="{% static "bootstrap-table.js" %}"></script>
+		<script src="/static/jquery-3.2.1.min.js"></script>
+		<script src="/static/bootstrap-table.js"></script>
 		<style> 
- 			table {word-break: break-all}  
+ 			table {word-break: break-all}
 		</style>
 	</head>
 	<body>
 
 
         <div>
-            <table data-toggle="table" data-pagination="true">
+            <h1>scan result</h1>
+            <table data-toggle="table" data-pagination="true" data-url="getresult">
 
                 <thead>
+                    <th data-field="type">type</th>
                     <th data-field="method">method</th>
                     <th data-field="url">url</th>
                     <th data-field="payload">payload</th>
-                    <th data-field="name">name</th>
                 </thead>
-                <tbody id="result_table">
-                    <script>
-                        $.getJSON("http://localhost:8000/getresult",function(json){
-                            var num = json.result_num;
-                            var result = json.result_list;
-
-                            for(var i=0;i<num;i++){
-                                var html="<tr>" +
-                                        "<td>" + result[i].method + "</td>" +
-                                        "<td>" + result[i].url + "</td>" +
-                                        "<td>";
-                                $.each(result[i].payload, function(k, v){html += JSON.stringify(v);})
-                                html += "</td>" +
-                                        "<td>" + "sqli" + "</td>" +
-                                        "</tr>";
-                                $("#result_table").append(html);
-
-                            }
-                            //console.log(result[0].payload);
-
-                        });
-                    </script>
-
+                <tbody id="result-table">
                 </tbody>
             </table>
         </div>
+        <div class="highlight">
+            <h1>http message</h1>
+            <pre><code class="language-html" id="html">here is http message.</code></pre>
+        </div>
 	</body>
+    <script>
+        $("#html").text(result[0].message);
+    </script>
 </html>

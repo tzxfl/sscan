@@ -30,11 +30,20 @@ def getResult(request):
     # 获取redis实例
     r = getRedisInstance()
     http_result_name = redis_config["http_result_name"]
-    result_num = r.llen(http_result_name)
+    result_list = r.lrange(http_result_name, 0, -1)
 
-    result_list = r.lrange(redis_config["http_result_name"], 0, -1)
-    for i in range(result_num):
-        result_list[i] = json.loads(result_list[i])
-    final_result = json.dumps({"result_num": result_num, "result_list": result_list})
+    # 处理格式
+    rel_list = []
+    for result in result_list:
+        result = json.loads(result)
+        string = ""
+        for r in result["payload"]:
+            for k, v in r.items():
+                string += k + "=" + v + "&"
+        result["payload"] = string
+        result = json.dumps(result)
+        rel_list.append(result)
+    rel = ",".join(rel_list)
+    rel = "[" + rel + "]"
 
-    return HttpResponse(final_result)
+    return HttpResponse(rel)

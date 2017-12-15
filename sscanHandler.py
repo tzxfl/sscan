@@ -42,18 +42,32 @@ def listenRedis(r, queue, listName):
 def scan(r, queue, scanModule):
     while 1:
         row = queue.get()
-        for moduleName in scanModule:
+        for module_name in scanModule:
             scanner = SqliScanner(row['method'], row['url'], row['header'], row['param'], row['data'])
             scanner.doWork()
             #scanner.scan_result['ret'] = 1
             #scanner.scan_result['param'] = '1'
             if scanner.scan_result['ret'] == 1:
+                row['type'] = module_name
                 row['payload'] = scanner.scan_result['param']
+                row['message'] = genCompleteHttpMessage(row['method'], row['url'], row['header'], row['param'], row['data'])
                 resultJson = json.dumps(row)
                 r.rpush(redis_config['http_result_name'], resultJson)
             #print 'done'
         #time.sleep(0.1)
 
+def genCompleteHttpMessage(method, url, header, param, data):
+    html = ""
+    html += method.upper() + " " + url + ("?" if param else "")
+    for k, v in param.items():
+        html += k + "=" + v + "&"
+    html += " HTTP/1.1" + "\n"
+    for k, v in header.items():
+        html += k + ": " + v + "\n"
+    html += "\n"
+    for k, v in data.items():
+        html += k + "=" + v + "&"
+    return html
 
 def scanWork():
     r = redis.Redis(connection_pool=pool)
