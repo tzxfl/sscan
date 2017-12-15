@@ -15,13 +15,13 @@ def solveUrlParam(rowJson):
 
     #无论如何都要处理下url
     query = urlparse.urlparse(res['url']).query
-    res['param'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(query.encode("UTF-8")).items()])
+    res['param'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(query).items()])
     res['data'] = {}
 
     if res['method'].lower() == 'post':
         #目前处理a=1&b=2形式，后续添加更多形式
         if rowJson['body']:
-            res['data'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(rowJson['body'].encode("UTF-8")).items()])
+            res['data'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(rowJson['body']).items()])
     return res
 
 
@@ -54,7 +54,8 @@ def scan(r, queue, scanModule):
                 resultJson = json.dumps(row)
                 r.rpush(redis_config['http_result_name'], resultJson)
             #print 'done'
-        #time.sleep(0.1)
+        #不加的话浪费cpu资源，引起电力浪费，然后boom
+        time.sleep(0.1)
 
 def genCompleteHttpMessage(method, url, header, param, data):
     html = ""
@@ -93,6 +94,7 @@ def scanWork():
     print "sscanHandler start..."
     # 使用while True来实现join，实现ctrl+c退出进程
     while True:
+        time.sleep(0.1)
         pass
 
 if __name__ == "__main__":
