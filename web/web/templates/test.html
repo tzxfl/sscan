@@ -17,24 +17,40 @@
 
         <div>
             <h1>scan result</h1>
-            <table data-toggle="table" data-pagination="true" data-url="getresult">
-
-                <thead>
-                    <th data-field="type">type</th>
-                    <th data-field="method">method</th>
-                    <th data-field="url">url</th>
-                    <th data-field="payload">payload</th>
-                </thead>
-                <tbody id="result-table">
-                </tbody>
+            <table id="re_table">
             </table>
         </div>
         <div class="highlight">
             <h1>http message</h1>
-            <pre><code class="language-html" id="html">here is http message.</code></pre>
+            <pre><code class="language-html" id="html">here is raw http message.</code></pre>
         </div>
 	</body>
     <script>
-        $("#html").text(result[0].message);
+        $('#re_table').bootstrapTable({
+            url: '/getresult',         //请求后台的URL（*）
+            method: 'get',                      //请求方式（*）
+            pagination: true,                   //是否显示分页（*）
+            sortable: false,                     //是否启用排序
+            pageSize: 5,                       //每页的记录行数（*）
+            search: true,                       //是否显示表格搜索，此搜索是客户端搜索，不会进服务端，所以，个人感觉意义不大
+            strictSearch: true,
+            columns: [{
+                field: 'type',
+                title: 'type'
+            }, {
+                field: 'method',
+                title: 'method'
+            }, {
+                field: 'url',
+                title: 'url'
+            }, {
+                field: 'payload',
+                title: 'payload'
+            }, ]
+
+        });
+        $("#re_table").on('click-row.bs.table', function (e, row, ele,field) {
+            $("#html").text(row.message);
+        })
     </script>
 </html>
