@@ -56,6 +56,8 @@ def scan(r, queue, scanModule):
             #print 'done'
         #time.sleep(0.1)
 
+
+# 生成原始http数据包
 def genCompleteHttpMessage(method, url, header, param, data):
     html = ""
     html += method.upper() + " " + url + ("?" if param else "")
