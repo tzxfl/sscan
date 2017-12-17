@@ -7,7 +7,6 @@ from lib.config import code_inject_config
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
-
 # code inject 检测模块
 # 利用延时
 class CodeInjectScanner(Scanner):
@@ -24,13 +23,15 @@ class CodeInjectScanner(Scanner):
         # payload   dict    注入payload
         self.payload = code_inject_config['payload']
 
-        self.random_key = "939628859"
+        self.p = "12345"
+        self.q = "6789"
+        self.pq = "83810205"
 
     # override
     def genPayload(self):
         payload = []
         for p in self.payload:
-            p = p % self.random_key
+            p = p % (self.p, self.q)
             payload.append(p)
         return payload
 
@@ -42,14 +43,14 @@ class CodeInjectScanner(Scanner):
             # do scan here
             if param_position == "get":
                 flag = self.doCurl(scan_param, self.data, self.header)
-                if self.random_key in flag.content:
+                if self.pq in flag.content:
                     logging.info('code inject in %s : %s' % (self.url, scan_param))
                     self.scan_result["param"].append(scan_param)
                     self.scan_result["ret"] = 1
 
             elif param_position == "post":
                 flag = self.doCurl(self.param, scan_param, self.header)
-                if self.random_key in flag.content:
+                if self.pq in flag.content:
                     logging.info('code inject in %s : %s' % (self.url, scan_param))
                     self.scan_result["param"].append(scan_param)
                     self.scan_result["ret"] = 1

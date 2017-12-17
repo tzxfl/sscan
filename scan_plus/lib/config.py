@@ -24,9 +24,9 @@ code_inject_config = {
     "sleep_time": 5,
     
     "payload": [
-        "1 xor(print(%s))",
-        "'.(print(%s)).'",
-        "\".(print(%s)).\"",
+        "1 xor(print(%s*%s))",
+        "'.(print(%s*%s)).'",
+        "\".(print(%s*%s)).\"",
     ]
 }
 
