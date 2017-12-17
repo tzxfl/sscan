@@ -393,7 +393,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 body = body.decode(char).encode("utf-8")
         char = chardet.detect(url)["encoding"]
         if char:
-            body = body.decode(char).encode("utf-8")
+            url = url.decode(char).encode("utf-8")
         json_result = {"method": method, "url": url, "headers": headers, "body": body}
         string_result = json.dumps(json_result)
         list_name = redis_config["http_data_name"]

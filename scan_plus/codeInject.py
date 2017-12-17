@@ -24,41 +24,35 @@ class CodeInjectScanner(Scanner):
         # payload   dict    注入payload
         self.payload = code_inject_config['payload']
 
+        self.random_key = "939628859"
+
     # override
     def genPayload(self):
         payload = []
         for p in self.payload:
-            p = p % self.sleep_time
+            p = p % self.random_key
             payload.append(p)
         return payload
 
     # override
-    def doScan(self, q):
+    def doScan(self, q, param_position):
         while not q.empty():
             scan_param = q.get()
 
             # do scan here
-            if scan_param.keys() == self.param.keys():
+            if param_position == "get":
                 flag = self.doCurl(scan_param, self.data, self.header)
-                if flag:
-                    # 检测是否误报
-                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(scan_param, self.data, self.header):
-                        logging.warning("False positives in %s" % self.url)
-                    else:
-                        logging.info('code inject in %s : %s' % (self.url, scan_param))
-                        self.scan_result["param"].append(scan_param)
-                        self.scan_result["ret"] = 1
+                if self.random_key in flag.content:
+                    logging.info('code inject in %s : %s' % (self.url, scan_param))
+                    self.scan_result["param"].append(scan_param)
+                    self.scan_result["ret"] = 1
 
-            else:
+            elif param_position == "post":
                 flag = self.doCurl(self.param, scan_param, self.header)
-                if flag:
-                    # 检测是否误报
-                    if self.doCurl(self.param, self.data, self.header) or not self.doCurl(self.param, scan_param, self.header):
-                        logging.warning("False positives in %s" % self.url)
-                    else:
-                        logging.info('code inject in %s : %s' % (self.url, scan_param))
-                        self.scan_result["param"].append(scan_param)
-                        self.scan_result["ret"] = 1
+                if self.random_key in flag.content:
+                    logging.info('code inject in %s : %s' % (self.url, scan_param))
+                    self.scan_result["param"].append(scan_param)
+                    self.scan_result["ret"] = 1
             q.task_done()
 
 if __name__ == "__main__":

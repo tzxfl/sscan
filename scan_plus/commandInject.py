@@ -26,12 +26,12 @@ class CommandInjectScanner(Scanner):
         self.ceye_api = command_inject_config["ceye_api"]
 
     # override
-    def doScan(self, q):
+    def doScan(self, q, param_position):
         while not q.empty():
             scan_param = q.get()
 
             # do scan here
-            if scan_param.keys() == self.param.keys():
+            if param_position == "get":
                 random_key = ''.join(str(random.random()).split('.'))
                 string_scan_param = json.dumps(scan_param) % (random_key, self.ceye_host)
                 scan_param = eval(string_scan_param)
@@ -46,7 +46,7 @@ class CommandInjectScanner(Scanner):
                     self.scan_result["param"].append(scan_param)
                     self.scan_result["ret"] = 1
 
-            else:
+            elif param_position == "post":
                 random_key = ''.join(str(random.random()).split('.'))
                 string_scan_param = json.dumps(scan_param) % (random_key, self.ceye_host)
                 scan_param = eval(string_scan_param)

@@ -98,14 +98,14 @@ class Scanner:
         if self.method.lower() == "get":
             try:
                 r = requests.get(self.url, params=param, headers=header, cookies=cookie, timeout=self.sleep_time)
-                return True
+                return r
             except Exception as e:
                 return False
 
         elif self.method.lower() == "post":
             try:
                 r = requests.post(self.url, params=param, data=data, headers=header, cookies=cookie, timeout=self.sleep_time)
-                return True
+                return r
             except Exception as e:
                 return False
 
