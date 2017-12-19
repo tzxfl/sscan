@@ -57,9 +57,9 @@ class CodeInjectScanner(Scanner):
 
 if __name__ == "__main__":
     method = "post"
-    url = "http://www.th1s.cn/test/sqli/code.php"
+    url = "http://xxx"
     header = {}
-    param = {"id": 1, "bbb": 3}
+    param = {"id": 1, "test": 3}
     data = {}
     #data = {"b": "2", "aa": 4}
 
