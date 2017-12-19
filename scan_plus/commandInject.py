@@ -7,8 +7,6 @@ from lib.config import command_inject_config
 import requests
 import json
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
-
 
 # command 检测模块
 # 利用ceye

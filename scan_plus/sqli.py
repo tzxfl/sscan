@@ -5,8 +5,6 @@
 from lib.scanner import *
 from lib.config import sqli_config
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
-
 
 # sql 注入检测模块
 # 利用延时盲注

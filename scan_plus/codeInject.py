@@ -5,7 +5,6 @@
 from lib.scanner import *
 from lib.config import code_inject_config
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
 # code inject 检测模块
 # 利用延时
