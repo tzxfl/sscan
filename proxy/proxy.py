@@ -13,12 +13,12 @@ import time
 import urlparse
 import zlib
 import logging
+import chardet
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from HTMLParser import HTMLParser
 from SocketServer import ThreadingMixIn
 from cStringIO import StringIO
 from subprocess import Popen, PIPE
-import chardet
 
 from web.web.doRedis.connectRedis import *
 from web.web.doRedis.config import redis_config

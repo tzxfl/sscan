@@ -12,7 +12,6 @@ from doRedis.config import redis_config
 def index(request):
     return render(request, "test.html")
 
-
 # 获取scan job
 def getJob(request):
 

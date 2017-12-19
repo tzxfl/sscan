@@ -3,7 +3,7 @@
 from multiprocessing import Process
 
 from proxy.proxy import *
-from scan_plus.sqli import *
+from scan_plus.SqlInject import *
 from web.web.doRedis.connectRedis import *
 
 
@@ -28,7 +28,7 @@ def solveUrlParam(rowJson):
 def listenRedis(r, queue, listName):
     #连接redis
 
-    while 1:
+    while True:
         if r.llen(listName) > 0:
             row = r.lpop(listName)
             rowJson = json.loads(row)
@@ -39,22 +39,20 @@ def listenRedis(r, queue, listName):
             time.sleep(1)
 
 
-def scan(r, queue, scanModule):
-    while 1:
+def scan(r, queue, scan_modules):
+    while True:
         row = queue.get()
-        for module_name in scanModule:
-            scanner = SqliScanner(row['method'], row['url'], row['header'], row['param'], row['data'])
+        for module_name in scan_modules:
+            scan_module = __import__(module_name)
+            scan_module_class = getattr(scan_module,  module_name + "Scanner")
+            scanner = scan_module_class(row['method'], row['url'], row['header'], row['param'], row['data'])
             scanner.doWork()
-            #scanner.scan_result['ret'] = 1
-            #scanner.scan_result['param'] = '1'
             if scanner.scan_result['ret'] == 1:
                 row['type'] = module_name
                 row['payload'] = scanner.scan_result['param']
                 row['message'] = genCompleteHttpMessage(row['method'], row['url'], row['header'], row['param'], row['data'])
                 resultJson = json.dumps(row)
                 r.rpush(redis_config['http_result_name'], resultJson)
-            #print 'done'
-        #time.sleep(0.1)
 
 
 # 生成原始http数据包
@@ -71,24 +69,38 @@ def genCompleteHttpMessage(method, url, header, param, data):
         html += k + "=" + v + "&"
     return html
 
+
+def importPlus():
+    os.chdir("scan_plus")
+    now_dir = os.getcwd()
+    filename = os.listdir(now_dir)
+    scan_moudle = []
+    for name in filename:
+        if name.endswith(".py") and name != "__init__.py":
+            name = name.split(".")[0]
+            scan_moudle.append(name)
+    return scan_moudle
+
+
 def scanWork():
     r = redis.Redis(connection_pool=pool)
     # 定义参数
-    listName = redis_config['http_data_name']
+    list_name = redis_config['http_data_name']
     queue = Queue.Queue()
-    scanModule = ['sqli']
+
+    scan_moudle = importPlus()
 
     if sys.argv[1:]:
-        threadNum = int(sys.argv[1])
+        thread_num = int(sys.argv[1])
     else:
-        threadNum = 5
+        thread_num = 5
 
-    t1 = threading.Thread(target=listenRedis, args=(r, queue, listName))
+    t1 = threading.Thread(target=listenRedis, args=(r, queue, list_name))
     t1.setDaemon(True)
     t1.start()
 
-    for i in range(threadNum):
-        t2 = threading.Thread(target=scan, args=(r, queue, scanModule))
+    for i in range(thread_num):
+        t2 = threading.Thread(target=scan, args=(r, queue, scan_moudle))
         t2.setDaemon(True)
         t2.start()
 

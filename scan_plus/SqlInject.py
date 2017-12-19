@@ -8,7 +8,7 @@ from lib.config import sqli_config
 
 # sql 注入检测模块
 # 利用延时盲注
-class SqliScanner(Scanner):
+class SqlInjectScanner(Scanner):
 
     def __init__(self, *args, **kwargs):
 
