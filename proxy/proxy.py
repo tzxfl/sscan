@@ -12,6 +12,7 @@ import threading
 import time
 import urlparse
 import zlib
+import logging
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from HTMLParser import HTMLParser
 from SocketServer import ThreadingMixIn
@@ -22,6 +23,7 @@ import chardet
 from web.web.doRedis.connectRedis import *
 from web.web.doRedis.config import redis_config
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
 def with_color(c, s):
     return "\x1b[%dm%s\x1b[0m" % (c, s)
@@ -387,18 +389,24 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def save_redis(self, method, url, headers, body):
         r = redis.Redis(connection_pool=pool)
 
-        if body:
-            char = chardet.detect(body)["encoding"]
-            if char:
-                body = body.decode(char).encode("utf-8")
-        char = chardet.detect(url)["encoding"]
-        if char:
-            url = url.decode(char).encode("utf-8")
-        json_result = {"method": method, "url": url, "headers": headers, "body": body}
-        string_result = json.dumps(json_result)
-        list_name = redis_config["http_data_name"]
+        # 处理body编码
+        if headers.has_key("content-encoding"):
+            encode = headers["content-encoding"]
+            if body:
+                body = self.decode_content_body(body, encode)
+                try:
+                    body = body.decode(chardet.detect(body)["encoding"]).encode("utf-8")
+                except Exception as e:
+                    logging.warning("unknown encoding, body decode failed")
 
-        r.lpush(list_name, string_result)
+        json_result = {"method": method, "url": url, "headers": headers, "body": body}
+
+        try:
+            string_result = json.dumps(json_result)
+            list_name = redis_config["http_data_name"]
+            r.lpush(list_name, string_result)
+        except Exception as e:
+            pass
 
 
 def proxyStart(HandlerClass=ProxyRequestHandler, ServerClass=ThreadingHTTPServer, protocol="HTTP/1.1"):
