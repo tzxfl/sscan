@@ -6,7 +6,6 @@ import Queue
 import logging
 import threading
 import requests
-import random
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - [line:%(lineno)d] - %(levelname)s: %(message)s')
 
