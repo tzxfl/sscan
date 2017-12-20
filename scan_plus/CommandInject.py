@@ -5,6 +5,7 @@
 from lib.scanner import *
 from lib.config import command_inject_config
 import requests
+import random
 import json
 
 

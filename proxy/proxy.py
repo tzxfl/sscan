@@ -135,7 +135,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         if req.path[0] == '/':
             if isinstance(self.connection, ssl.SSLSocket):
-                req.path = "https://%s%s" % (req.headers['Host'], req.path)
+                try:
+                    req.path = "https://%s%s" % (req.headers['Host'], req.path)
+                except:
+                    print req.headers
             else:
                 req.path = "http://%s%s" % (req.headers['Host'], req.path)
 

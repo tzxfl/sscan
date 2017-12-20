@@ -2,6 +2,7 @@
 
 import importlib
 import Queue
+import time
 from multiprocessing import Process
 
 from proxy.proxy import *
@@ -15,7 +16,6 @@ def solveUrlParam(rowJson):
 
     #无论如何都要处理下url
     query = urlparse.urlparse(rowJson['url']).query
-    print query
     res['param'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(query.encode("UTF-8")).items()])
     res['data'] = {}
     res['url'] = rowJson['url'].split("?")[0]
@@ -49,6 +49,7 @@ def scan(r, queue, scan_modules):
             scanner = scan_module_class(row['method'], row['url'], row['header'], row['param'], row['data'])
             scanner.doWork()
             if scanner.scan_result['ret'] == 1:
+                row['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
                 row['type'] = module_name
                 row['payload'] = scanner.scan_result['param']
                 row['message'] = genCompleteHttpMessage(row['method'], row['url'], row['header'], row['param'], row['data'])
