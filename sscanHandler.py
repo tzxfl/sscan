@@ -90,8 +90,8 @@ def scanWork():
 
     scan_moudle = importPlus()
 
-    if sys.argv[1:]:
-        thread_num = int(sys.argv[1])
+    if sys.argv[2:]:
+        thread_num = int(sys.argv[2])
     else:
         thread_num = 5
 
