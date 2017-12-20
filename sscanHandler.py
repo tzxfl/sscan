@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 
+import importlib
+import Queue
 from multiprocessing import Process
 
 from proxy.proxy import *
-from scan_plus.SqlInject import *
 from web.web.doRedis.connectRedis import *
 
 
 def solveUrlParam(rowJson):
     res = {}
-    res['url'] = rowJson['url']
     res['method'] = rowJson['method']
     res['header'] = rowJson['headers']
 
     #无论如何都要处理下url
-    query = urlparse.urlparse(res['url']).query
+    query = urlparse.urlparse(rowJson['url']).query
+    print query
     res['param'] = dict([(k, v[0]) for k, v in urlparse.parse_qs(query.encode("UTF-8")).items()])
     res['data'] = {}
-
+    res['url'] = rowJson['url'].split("?")[0]
     if res['method'].lower() == 'post':
         #目前处理a=1&b=2形式，后续添加更多形式
         if rowJson['body']:
@@ -43,7 +44,7 @@ def scan(r, queue, scan_modules):
     while True:
         row = queue.get()
         for module_name in scan_modules:
-            scan_module = __import__(module_name)
+            scan_module = importlib.import_module("scan_plus." + module_name)
             scan_module_class = getattr(scan_module,  module_name + "Scanner")
             scanner = scan_module_class(row['method'], row['url'], row['header'], row['param'], row['data'])
             scanner.doWork()
@@ -71,7 +72,6 @@ def genCompleteHttpMessage(method, url, header, param, data):
 
 
 def importPlus():
-    os.chdir("scan_plus")
     now_dir = os.getcwd()
     filename = os.listdir(now_dir)
     scan_moudle = []
@@ -83,6 +83,7 @@ def importPlus():
 
 
 def scanWork():
+    os.chdir("scan_plus")
     r = redis.Redis(connection_pool=pool)
     # 定义参数
     list_name = redis_config['http_data_name']
